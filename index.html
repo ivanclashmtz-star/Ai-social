@@ -10,7 +10,15 @@
 <div class="section"><div class="sectionhead"><h2>Tus personajes</h2><span onclick="show('characters')">Ver todos ›</span></div><div id="homePeople" class="people"></div></div></section>
 <section id="characters" class="view"><button class="back" onclick="show('home')">← Inicio</button><h1>Mis personajes</h1><div class="sub">Tus personajes creados.</div><div id="characterList"></div><button class="primary" onclick="show('create')">＋ Crear personaje</button></section>
 <section id="create" class="view"><button class="back" onclick="show('home')">← Inicio</button><h1>Crear personaje</h1><div class="sub">Primera versión del creador.</div><div class="form">
-<label>Nombre</label><input id="name" maxlength="40" placeholder="Ej. Alex"><label>Edad</label><input id="age" type="number" min="18" max="120" placeholder="18 o más"><label>Personalidad</label><input id="personality" maxlength="120" placeholder="Ej. divertido, seguro, curioso"><label>Descripción</label><textarea id="description" maxlength="500" placeholder="Cuéntame quién es..."></textarea><label>Avatar</label><select id="avatar"><option>🌙</option><option>🌸</option><option>🔥</option><option>⭐</option><option>🦋</option><option>🌊</option><option>🖤</option><option>💜</option></select><button class="primary" onclick="createCharacter()">✨ Guardar personaje</button><button class="secondary" onclick="clearForm()">Limpiar formulario</button></div></section>
+<label>Nombre</label><input id="name" maxlength="40" placeholder="Ej. Alex"><label>Edad</label><input id="age" type="number" min="18" max="120" placeholder="18 o más"><label>Personalidad</label><input id="personality" maxlength="120" placeholder="Ej. divertido, seguro, curioso">
+<label>Forma de hablar</label><select id="speech"><option>Natural y amistosa</option><option>Divertida y juguetona</option><option>Tranquila y reflexiva</option><option>Directa y segura</option><option>Elegante y seria</option></select>
+<label>Gustos e intereses</label><input id="interests" maxlength="180" placeholder="Ej. música, videojuegos, viajes">
+<label>Descripción</label><textarea id="description" maxlength="500" placeholder="Cuéntame quién es..."></textarea><label>Avatar</label><select id="avatar"><option>🌙</option><option>🌸</option><option>🔥</option><option>⭐</option><option>🦋</option><option>🌊</option><option>🖤</option><option>💜</option></select><button class="primary" onclick="createCharacter()">✨ Guardar personaje</button><button class="secondary" onclick="clearForm()">Limpiar formulario</button></div></section>
+
+<section id="profileView" class="view">
+<button class="back" onclick="show('characters')">← Mis personajes</button>
+<div id="profileContent"></div>
+</section>
 <section id="chats" class="view"><button class="back" onclick="show('home')">← Inicio</button><h1>Mis chats</h1><div class="sub">Aquí conectaremos las conversaciones reales después.</div><div class="person" onclick="show('chat')"><div class="avatar">🌙</div><strong>Alex ✓</strong><span>Chat de demostración</span></div></section>
 <section id="chat" class="view"><button class="back" onclick="show('home')">← Personajes</button><h1>Alex ✓</h1><div class="sub">Carismático · Curioso · Directo</div><div class="chat"><div class="msg ai">Hola. Me alegra verte por aquí. ¿Qué tienes en mente?</div><div class="msg me">Quiero conocerte mejor.</div><div class="msg ai">Entonces empecemos por algo interesante.</div></div></section>
 </main><nav><button class="active" onclick="show('home')"><b>⌂</b>Inicio</button><button onclick="show('characters')"><b>◉</b>Personajes</button><button onclick="show('chats')"><b>◌</b>Chats</button><button onclick="show('create')"><b>＋</b>Crear</button><button><b>♙</b>Perfil</button></nav></div>
@@ -22,9 +30,44 @@ function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remo
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function card(c,full){return '<div class="person" onclick="openCharacter(''+c.id+'')"><div class="avatar">'+c.avatar+'</div><strong>'+esc(c.name)+'</strong><span>'+esc(c.personality||"Personalidad por definir")+'</span>'+(full?'<button class="delete" onclick="event.stopPropagation();deleteCharacter(\''+c.id+'\')">Eliminar</button>':"")+'</div>'}
 function renderCharacters(){const a=getCharacters(),h=document.getElementById("homePeople"),l=document.getElementById("characterList");if(!a.length){h.innerHTML='<div class="empty">Todavía no has creado personajes.<br>¡Crea el primero! ✨</div>';l.innerHTML='<div class="empty">No tienes personajes guardados todavía.</div>';return}h.innerHTML=a.slice(0,5).map(c=>card(c,false)).join("");l.innerHTML='<div class="people">'+a.map(c=>card(c,true)).join("")+'</div>'}
-function createCharacter(){const name=document.getElementById("name").value.trim(),age=Number(document.getElementById("age").value),personality=document.getElementById("personality").value.trim(),description=document.getElementById("description").value.trim(),avatar=document.getElementById("avatar").value;if(!name){alert("Escribe un nombre.");return}if(!age||age<18){alert("La edad debe ser 18 años o más.");return}const a=getCharacters();a.push({id:Date.now().toString(),name,age,personality,description,avatar});saveCharacters(a);clearForm();renderCharacters();show("characters")}
-function clearForm(){["name","age","personality","description"].forEach(id=>document.getElementById(id).value="");document.getElementById("avatar").value="🌙"}
+function createCharacter(){
+const name=document.getElementById("name").value.trim(),
+age=Number(document.getElementById("age").value),
+personality=document.getElementById("personality").value.trim(),
+speech=document.getElementById("speech").value,
+interests=document.getElementById("interests").value.trim(),
+description=document.getElementById("description").value.trim(),
+avatar=document.getElementById("avatar").value;
+if(!name){alert("Escribe un nombre.");return}
+if(!age||age<18){alert("La edad debe ser 18 años o más.");return}
+const a=getCharacters();
+a.push({id:Date.now().toString(),name,age,personality,speech,interests,description,avatar});
+saveCharacters(a);clearForm();renderCharacters();show("characters")
+}
+function clearForm(){
+["name","age","personality","interests","description"].forEach(id=>document.getElementById(id).value="");
+document.getElementById("speech").value="Natural y amistosa";
+document.getElementById("avatar").value="🌙"
+}
 function deleteCharacter(id){saveCharacters(getCharacters().filter(c=>c.id!==id));renderCharacters()}
-function openCharacter(id){const c=getCharacters().find(x=>x.id===id);if(!c)return;alert(c.name+"\n\n"+(c.description||"Sin descripción.")+"\n\nEdad: "+c.age);show("chat")}
+function openCharacter(id){
+const c=getCharacters().find(x=>x.id===id);if(!c)return;
+const pc=document.getElementById("profileContent");
+pc.innerHTML='<div class="avatar" style="height:230px;font-size:90px">'+c.avatar+'</div>'+
+'<h1>'+esc(c.name)+'</h1>'+
+'<div class="sub">Edad: '+c.age+' · '+esc(c.personality||"Personalidad por definir")+'</div>'+
+'<div class="person" style="margin-bottom:12px"><strong>🗣️ Forma de hablar</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.speech||"Natural y amistosa")+'</p></div>'+
+'<div class="person" style="margin-bottom:12px"><strong>💜 Gustos e intereses</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.interests||"Aún no definidos")+'</p></div>'+
+'<div class="person" style="margin-bottom:12px"><strong>📝 Descripción</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.description||"Sin descripción.")+'</p></div>'+
+'<button class="primary" onclick="startChat(\''+c.id+'\')">💬 Iniciar chat</button>'+
+'<button class="secondary" onclick="deleteCharacter(\''+c.id+'\');show(\'characters\')">Eliminar personaje</button>';
+show("profileView")
+}
+function startChat(id){
+const c=getCharacters().find(x=>x.id===id);if(!c)return;
+document.querySelector("#chat h1").textContent=c.name+" ✓";
+document.querySelector("#chat .sub").textContent=(c.personality||"Personalidad propia")+" · "+(c.speech||"Natural y amistosa");
+show("chat")
+}
 renderCharacters();
 </script></body></html>
