@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -6,213 +7,182 @@
 <meta name="theme-color" content="#08061b">
 <title>AI Social</title>
 <style>
+:root{
+  --bg:#08061b;--panel:#12102b;--panel2:#18143a;--text:#fff;--muted:#aaa7c4;
+  --pink:#ff2d9b;--purple:#7b3ff2;--blue:#2587ff;--orange:#ff6138;--line:#ffffff18;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#08061b;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:430px;margin:auto;min-height:100vh;background:linear-gradient(145deg,#08061b,#14082e)}
-header{height:70px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;background:#0b0820;position:sticky;top:0;z-index:5;border-bottom:1px solid #ffffff12}
-.logo{font-size:24px;font-weight:900;background:linear-gradient(90deg,#ff3b9d,#8c5cff,#31a7ff);-webkit-background-clip:text;color:transparent}
-.profile{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#ff2b87,#7d4dff)}
-main{padding:20px 16px 100px}
-.view{display:none}.view.active{display:block}
-h1{font-size:29px;margin:6px 0}.sub{color:#aaa7c2;margin:0 0 20px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card{min-height:150px;border:0;border-radius:22px;padding:17px;color:#fff;text-align:left;box-shadow:0 12px 30px #0005}
-.card:nth-child(1){background:linear-gradient(145deg,#e81f91,#812be7)}
-.card:nth-child(2){background:linear-gradient(145deg,#ff7a18,#ef245f)}
-.card:nth-child(3){background:linear-gradient(145deg,#178cff,#154bd8)}
-.card:nth-child(4){background:linear-gradient(145deg,#7d32ed,#3620a6)}
-.card .emoji{font-size:30px}.card h3{margin:12px 0 5px}.card p{margin:0;font-size:13px;color:#f4eaff}
-.primary{width:100%;padding:15px;border:0;border-radius:15px;background:linear-gradient(90deg,#ff2b87,#813cff);color:#fff;font-weight:800;font-size:16px}
-.secondary{width:100%;padding:13px;border:1px solid #ffffff20;border-radius:15px;background:#15122f;color:#fff;font-weight:700;margin-top:10px}
-.back{border:0;background:none;color:#bbb5d1;padding:0 0 10px;font-size:15px}
-.form label{display:block;font-size:13px;font-weight:700;margin:16px 0 7px}
-.form input,.form textarea,.form select{width:100%;padding:13px;border:1px solid #302a4d;border-radius:14px;background:#12102b;color:#fff;font-size:16px}
-.form textarea{min-height:100px;resize:none}
-.character{display:flex;align-items:center;gap:12px;padding:12px;background:#12102b;border:1px solid #ffffff12;border-radius:18px;margin-bottom:10px}
-.characterAvatar{width:58px;height:58px;border-radius:16px;background:linear-gradient(145deg,#311a57,#14122c);display:grid;place-items:center;font-size:30px}
-.characterInfo{flex:1}.characterInfo strong{display:block}.characterInfo span{font-size:12px;color:#aaa7c2}
-.empty{text-align:center;padding:30px 15px;border:1px dashed #393354;border-radius:18px;color:#aaa7c2}
-.profileAvatar{height:220px;border-radius:24px;background:linear-gradient(145deg,#311a57,#14122c);display:grid;place-items:center;font-size:90px}
-.info{padding:15px;border:1px solid #ffffff12;background:#12102b;border-radius:17px;margin:10px 0}.info strong{display:block;margin-bottom:5px}.info span{color:#aaa7c2;font-size:14px}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);height:74px;background:#0d0a21f2;border-top:1px solid #ffffff12;display:flex;justify-content:space-around;align-items:center;z-index:10}
-nav button{border:0;background:none;color:#77748d;font-size:10px}nav b{display:block;font-size:21px;margin-bottom:2px}nav .active{color:#ff4a9c}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:430px;margin:auto;min-height:100vh;padding-bottom:92px}
+header{padding:20px 18px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#0b0820,#100b29)}
+.logo{font-size:34px;font-weight:900;letter-spacing:-1.5px;background:linear-gradient(90deg,#ff299d,#6e7cff);-webkit-background-clip:text;color:transparent}
+.spark{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#ff299d,#8645f4);font-size:28px}
+main{padding:18px 16px 24px}
+h1{font-size:42px;line-height:1.05;margin:22px 0 8px}
+h2{font-size:30px;margin:0 0 8px}
+h3{margin:0 0 8px}
+.subtitle{font-size:20px;color:var(--muted);line-height:1.4;margin:0 0 26px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);border-radius:28px;padding:26px 20px;min-height:190px;color:#fff;text-align:left;box-shadow:0 15px 45px #0004}
+.card .emoji{font-size:38px;display:block;margin-bottom:25px}
+.card strong{display:block;font-size:20px;margin-bottom:8px}
+.card span{font-size:17px;line-height:1.35}
+.c1{background:linear-gradient(145deg,#e71a91,#7926e6)}
+.c2{background:linear-gradient(145deg,#ff721d,#f1275d)}
+.c3{background:linear-gradient(145deg,#1687ef,#2656d8)}
+.c4{background:linear-gradient(145deg,#6531e6,#4320b8)}
+.section{margin-top:34px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sectionhead a{color:#fff;font-size:17px}
+.empty{border:1px dashed #ffffff30;border-radius:22px;padding:24px;color:var(--muted);text-align:center}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);height:82px;background:#100d29f2;border-top:1px solid #ffffff15;display:grid;grid-template-columns:repeat(5,1fr);backdrop-filter:blur(16px);z-index:10}
+.navbtn{border:0;background:none;color:#77748f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:12px}
+.navbtn b{font-size:25px;line-height:1}
+.navbtn.active{color:#ff3aa6}
+.back{border:0;background:none;color:#c9c6db;font-size:18px;padding:4px 0;margin-bottom:18px}
+.form{display:grid;gap:18px}
+label{font-weight:800;font-size:17px}
+input,select,textarea{width:100%;margin-top:8px;background:#13102f;border:1px solid #ffffff18;border-radius:20px;color:#fff;padding:17px 16px;outline:none}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:#a45cff}
+.primary{border:0;border-radius:18px;padding:17px;background:linear-gradient(90deg,#ff239b,#733cff);color:#fff;font-weight:800;font-size:18px}
+.secondary{border:1px solid #ffffff20;border-radius:18px;padding:15px;background:#15122f;color:#fff;font-weight:700}
+.notice{background:#171333;border:1px solid #ffffff12;border-radius:18px;padding:14px;color:#c9c5dd;font-size:14px;line-height:1.4}
+.char{display:flex;gap:14px;align-items:center;background:#14102f;border:1px solid #ffffff14;border-radius:24px;padding:16px;margin-bottom:12px}
+.avatar{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#ff2d9b,#633cf3);font-size:29px;flex:none}
+.char .info{min-width:0;flex:1}
+.char .name{font-size:18px;font-weight:800}
+.char .meta{color:var(--muted);font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char button{border:0;border-radius:13px;background:#292052;color:#fff;padding:10px}
+.toast{position:fixed;left:50%;bottom:94px;transform:translateX(-50%);background:#fff;color:#100d25;border-radius:15px;padding:12px 16px;font-weight:700;z-index:20;box-shadow:0 10px 30px #0006;display:none}
+.small{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="app">
-<header><div class="logo">AI Social</div><div class="profile">✦</div></header>
-<main>
+<header>
+  <button class="logo" style="border:0;background:none;padding:0" onclick="go('home')">AI Social</button>
+  <div class="spark">✦</div>
+</header>
 
-<section id="home" class="view active">
-<h1>¡Hola! 👋</h1>
-<div class="sub">Crea y conoce personajes que cobran vida con IA.</div>
-<div class="grid">
-<button class="card" onclick="showView('characters')"><div class="emoji">👥</div><h3>Mis personajes</h3><p>Gestiona tus personajes.</p></button>
-<button class="card" onclick="showView('create')"><div class="emoji">✨</div><h3>Crear personaje</h3><p>Diseña uno nuevo.</p></button>
-<button class="card" onclick="showView('chats')"><div class="emoji">💬</div><h3>Mis chats</h3><p>Continúa tus conversaciones.</p></button>
-<button class="card"><div class="emoji">🌌</div><h3>Explorar</h3><p>Descubre personajes.</p></button>
-</div>
-</section>
+<main id="content"></main>
 
-<section id="characters" class="view">
-<button class="back" onclick="showView('home')">← Inicio</button>
-<h1>Mis personajes</h1><div class="sub">Tus personajes creados.</div>
-<div id="characterList"></div>
-<button class="primary" onclick="showView('create')">＋ Crear personaje</button>
-</section>
-
-<section id="create" class="view">
-<button class="back" onclick="showView('home')">← Inicio</button>
-<h1>Crear personaje</h1>
-<div class="sub">Completa los datos básicos para crear tu personaje.</div>
-<div class="form">
-<label>Nombre</label>
-<input id="name" placeholder="Ej. Alex">
-<label>Edad</label>
-<input id="age" type="number" min="18" placeholder="18 o más">
-<label>Personalidad</label>
-<input id="personality" placeholder="Ej. divertido, seguro, curioso">
-<label>Forma de hablar</label>
-<select id="speech"><option>Natural y amistosa</option><option>Divertida y juguetona</option><option>Tranquila y reflexiva</option><option>Directa y segura</option><option>Elegante y seria</option></select>
-<label>Gustos e intereses</label>
-<input id="interests" placeholder="Ej. música, videojuegos, viajes">
-<label>Descripción</label>
-<textarea id="description" placeholder="Cuéntame quién es este personaje..."></textarea>
-<label>Avatar</label>
-<select id="avatar"><option>🌙</option><option>🌸</option><option>🔥</option><option>⭐</option><option>🦋</option><option>🌊</option><option>🖤</option><option>💜</option></select>
-<button class="primary" onclick="saveCharacter()">✨ Guardar personaje</button>
-<button class="secondary" onclick="clearForm()">Limpiar</button>
-</div>
-</section>
-
-<section id="profileView" class="view">
-<button class="back" onclick="showView('characters')">← Mis personajes</button>
-<div id="profileContent"></div>
-</section>
-
-<section id="chats" class="view">
-<button class="back" onclick="showView('home')">← Inicio</button>
-<h1>Mis chats</h1><div class="sub">Aquí conectaremos la IA después.</div>
-<div class="empty">Todavía no tienes conversaciones.</div>
-</section>
-
-</main>
 <nav>
-<button onclick="showView('home')"><b>⌂</b>Inicio</button>
-<button onclick="showView('characters')"><b>◉</b>Personajes</button>
-<button onclick="showView('chats')"><b>◌</b>Chats</button>
-<button onclick="showView('create')"><b>＋</b>Crear</button>
-<button><b>♙</b>Perfil</button>
+  <button class="navbtn active" data-nav="home" onclick="go('home')"><b>⌂</b>Inicio</button>
+  <button class="navbtn" data-nav="characters" onclick="go('characters')"><b>◉</b>Personajes</button>
+  <button class="navbtn" data-nav="chats" onclick="go('chats')"><b>◌</b>Chats</button>
+  <button class="navbtn" data-nav="create" onclick="go('create')"><b>＋</b>Crear</button>
+  <button class="navbtn" data-nav="profile" onclick="go('profile')"><b>♙</b>Perfil</button>
 </nav>
+<div id="toast" class="toast"></div>
 </div>
 
 <script>
-var STORAGE_KEY="ai_social_characters";
+const KEY="ai_social_characters_v5";
+const getChars=()=>JSON.parse(localStorage.getItem(KEY)||"[]");
+const saveChars=(x)=>localStorage.setItem(KEY,JSON.stringify(x));
+const content=document.getElementById("content");
 
-function showView(id){
-  var views=document.querySelectorAll(".view");
-  for(var i=0;i<views.length;i++){views[i].classList.remove("active");}
-  var target=document.getElementById(id);
-  if(target){target.classList.add("active");}
-  if(id==="characters"){renderCharacters();}
+function go(page){
+  history.replaceState({}, "", "#"+page);
+  render(page);
   window.scrollTo(0,0);
 }
+window.addEventListener("hashchange",()=>render(location.hash.slice(1)||"home"));
 
-function getCharacters(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}
-  catch(e){return [];}
+function render(page){
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.nav===page));
+  if(page==="create") return renderCreate();
+  if(page==="characters") return renderCharacters();
+  if(page==="chats") return renderChats();
+  if(page==="profile") return renderProfile();
+  renderHome();
 }
 
-function saveCharacters(list){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(list));
+function renderHome(){
+  const chars=getChars();
+  content.innerHTML=`
+    <h1>¡Hola! 👋</h1>
+    <p class="subtitle">Crea y conoce personajes que cobran vida con IA.</p>
+    <div class="grid">
+      <button class="card c1" onclick="go('characters')"><span class="emoji">👥</span><strong>Mis personajes</strong><span>Gestiona tus personajes.</span></button>
+      <button class="card c2" onclick="go('create')"><span class="emoji">✨</span><strong>Crear personaje</strong><span>Diseña uno nuevo.</span></button>
+      <button class="card c3" onclick="go('chats')"><span class="emoji">💬</span><strong>Mis chats</strong><span>Continúa tus conversaciones.</span></button>
+      <button class="card c4" onclick="showToast('La exploración llegará en el siguiente paso.')"><span class="emoji">🌌</span><strong>Explorar</strong><span>Descubre personajes.</span></button>
+    </div>
+    <section class="section">
+      <div class="sectionhead"><h2>Tus personajes</h2><a onclick="go('characters')">Ver todos ›</a></div>
+      ${chars.length ? chars.slice(0,3).map(charMini).join("") : `<div class="empty">Todavía no tienes personajes.<br><br><button class="primary" onclick="go('create')">Crear mi primer personaje</button></div>`}
+    </section>`;
 }
 
-function escapeText(text){
-  var div=document.createElement("div");
-  div.textContent=text||"";
-  return div.innerHTML;
+function renderCreate(){
+ content.innerHTML=`
+ <button class="back" onclick="go('home')">← Inicio</button>
+ <h2>Crear personaje</h2>
+ <p class="subtitle">Primera versión del creador.</p>
+ <div class="notice">En esta versión guardaremos el personaje directamente en este navegador. Después conectaremos una base de datos y la IA.</div><br>
+ <form class="form" id="form">
+   <label>Nombre<input id="name" required placeholder="Ej. Alex"></label>
+   <label>Edad<input id="age" required type="number" min="18" placeholder="18 o más"></label>
+   <label>Personalidad<input id="personality" required placeholder="Ej. divertido, seguro, curioso"></label>
+   <label>Forma de hablar<select id="speech"><option>Natural y amistosa</option><option>Divertida y juguetona</option><option>Seria y tranquila</option><option>Directa y segura</option></select></label>
+   <label>Gustos e intereses<input id="interests" placeholder="Ej. música, videojuegos, viajes"></label>
+   <label>Descripción<textarea id="description" placeholder="Cuenta brevemente quién es este personaje..."></textarea></label>
+   <label>Avatar<select id="avatar"><option>👩</option><option>👨</option><option>🧑</option><option>🦊</option><option>🐱</option><option>🤖</option><option>✨</option></select></label>
+   <button class="primary" type="submit">Guardar personaje</button>
+   <button class="secondary" type="button" onclick="go('home')">Cancelar</button>
+ </form>`;
+ document.getElementById("form").onsubmit=saveCharacter;
 }
 
-function clearForm(){
-  document.getElementById("name").value="";
-  document.getElementById("age").value="";
-  document.getElementById("personality").value="";
-  document.getElementById("speech").value="Natural y amistosa";
-  document.getElementById("interests").value="";
-  document.getElementById("description").value="";
-  document.getElementById("avatar").value="🌙";
+function saveCharacter(e){
+ e.preventDefault();
+ const age=Number(document.getElementById("age").value);
+ if(age<18){showToast("La edad mínima es 18 años.");return;}
+ const chars=getChars();
+ chars.unshift({
+  id:Date.now(),name:document.getElementById("name").value.trim(),age,
+  personality:document.getElementById("personality").value.trim(),
+  speech:document.getElementById("speech").value,
+  interests:document.getElementById("interests").value.trim(),
+  description:document.getElementById("description").value.trim(),
+  avatar:document.getElementById("avatar").value
+ });
+ saveChars(chars);
+ showToast("Personaje guardado ✓");
+ setTimeout(()=>go("characters"),450);
 }
 
-function saveCharacter(){
-  var name=document.getElementById("name").value.trim();
-  var age=parseInt(document.getElementById("age").value,10);
-  if(!name){alert("Escribe un nombre.");return;}
-  if(isNaN(age)||age<18){alert("La edad debe ser 18 años o más.");return;}
-
-  var character={
-    id:String(Date.now()),
-    name:name,
-    age:age,
-    personality:document.getElementById("personality").value.trim(),
-    speech:document.getElementById("speech").value,
-    interests:document.getElementById("interests").value.trim(),
-    description:document.getElementById("description").value.trim(),
-    avatar:document.getElementById("avatar").value
-  };
-
-  var list=getCharacters();
-  list.push(character);
-  saveCharacters(list);
-  clearForm();
-  showView("characters");
+function charMini(c){
+ return `<div class="char"><div class="avatar">${c.avatar}</div><div class="info"><div class="name">${esc(c.name)}</div><div class="meta">${esc(c.personality)}</div></div><button onclick="openChar(${c.id})">Ver</button></div>`;
 }
-
 function renderCharacters(){
-  var container=document.getElementById("characterList");
-  var list=getCharacters();
-
-  if(!list.length){
-    container.innerHTML='<div class="empty">✨<br><br>Aún no tienes personajes.<br>¡Crea el primero!</div>';
-    return;
-  }
-
-  var html="";
-  for(var i=0;i<list.length;i++){
-    var c=list[i];
-    html+='<button class="character" style="width:100%;text-align:left;color:white" onclick="openProfile(\''+c.id+'\')">';
-    html+='<div class="characterAvatar">'+escapeText(c.avatar)+'</div>';
-    html+='<div class="characterInfo"><strong>'+escapeText(c.name)+'</strong>';
-    html+='<span>'+escapeText(c.personality||"Personalidad por definir")+'</span></div></button>';
-  }
-  container.innerHTML=html;
+ const chars=getChars();
+ content.innerHTML=`<div class="sectionhead"><div><h2>Mis personajes</h2><div class="small">${chars.length} personaje(s)</div></div><button class="primary" style="padding:11px 14px;font-size:14px" onclick="go('create')">＋ Crear</button></div>
+ ${chars.length?chars.map(charMini).join(""):`<div class="empty">Aquí aparecerán los personajes que crees.</div>`}`;
 }
-
-function openProfile(id){
-  var list=getCharacters(), c=null;
-  for(var i=0;i<list.length;i++){if(list[i].id===id){c=list[i];break;}}
-  if(!c)return;
-
-  document.getElementById("profileContent").innerHTML=
-    '<div class="profileAvatar">'+escapeText(c.avatar)+'</div>'+
-    '<h1>'+escapeText(c.name)+'</h1>'+
-    '<div class="sub">Edad: '+c.age+'</div>'+
-    '<div class="info"><strong>🎭 Personalidad</strong><span>'+escapeText(c.personality||"No definida")+'</span></div>'+
-    '<div class="info"><strong>🗣️ Forma de hablar</strong><span>'+escapeText(c.speech)+'</span></div>'+
-    '<div class="info"><strong>💜 Gustos e intereses</strong><span>'+escapeText(c.interests||"No definidos")+'</span></div>'+
-    '<div class="info"><strong>📝 Descripción</strong><span>'+escapeText(c.description||"Sin descripción")+'</span></div>'+
-    '<button class="primary" onclick="alert(\'El chat real lo conectaremos en el siguiente paso. 🚀\')">💬 Iniciar chat</button>'+
-    '<button class="secondary" onclick="removeCharacter(\''+c.id+'\')">🗑️ Eliminar personaje</button>';
-
-  showView("profileView");
+function openChar(id){
+ const c=getChars().find(x=>x.id===id);
+ if(!c)return;
+ content.innerHTML=`<button class="back" onclick="go('characters')">← Mis personajes</button>
+ <div class="char" style="margin-bottom:18px"><div class="avatar" style="width:74px;height:74px;font-size:38px">${c.avatar}</div><div class="info"><div class="name" style="font-size:24px">${esc(c.name)}</div><div class="meta">${c.age} años · ${esc(c.speech)}</div></div></div>
+ <div class="notice"><b>Personalidad:</b> ${esc(c.personality)}<br><br><b>Intereses:</b> ${esc(c.interests||"No especificados")}<br><br><b>Descripción:</b> ${esc(c.description||"Sin descripción.")}</div>
+ <br><button class="primary" onclick="showToast('El chat con IA será el siguiente módulo.')">💬 Iniciar chat</button>`;
 }
-
-function removeCharacter(id){
-  var list=getCharacters().filter(function(c){return c.id!==id;});
-  saveCharacters(list);
-  showView("characters");
+function renderChats(){
+ content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones aparecerán aquí.</p><div class="empty">Todavía no hay conversaciones.<br><br>Primero crea un personaje y después conectaremos el chat con IA.</div>`;
 }
+function renderProfile(){
+ content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v5.<br>Los personajes se guardan en este dispositivo.</div>`;
+}
+function showToast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
+function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-renderCharacters();
+render(location.hash.slice(1)||"home");
 </script>
 </body>
 </html>
