@@ -22,52 +22,138 @@
 <section id="chats" class="view"><button class="back" onclick="show('home')">← Inicio</button><h1>Mis chats</h1><div class="sub">Aquí conectaremos las conversaciones reales después.</div><div class="person" onclick="show('chat')"><div class="avatar">🌙</div><strong>Alex ✓</strong><span>Chat de demostración</span></div></section>
 <section id="chat" class="view"><button class="back" onclick="show('home')">← Personajes</button><h1>Alex ✓</h1><div class="sub">Carismático · Curioso · Directo</div><div class="chat"><div class="msg ai">Hola. Me alegra verte por aquí. ¿Qué tienes en mente?</div><div class="msg me">Quiero conocerte mejor.</div><div class="msg ai">Entonces empecemos por algo interesante.</div></div></section>
 </main><nav><button class="active" onclick="show('home')"><b>⌂</b>Inicio</button><button onclick="show('characters')"><b>◉</b>Personajes</button><button onclick="show('chats')"><b>◌</b>Chats</button><button onclick="show('create')"><b>＋</b>Crear</button><button><b>♙</b>Perfil</button></nav></div>
+
 <script>
 const KEY="aiSocialCharacters";
-function getCharacters(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
-function saveCharacters(x){localStorage.setItem(KEY,JSON.stringify(x))}
-function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");if(id==="characters"||id==="home")renderCharacters();scrollTo(0,0)}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function card(c,full){return '<div class="person" onclick="openCharacter(''+c.id+'')"><div class="avatar">'+c.avatar+'</div><strong>'+esc(c.name)+'</strong><span>'+esc(c.personality||"Personalidad por definir")+'</span>'+(full?'<button class="delete" onclick="event.stopPropagation();deleteCharacter(\''+c.id+'\')">Eliminar</button>':"")+'</div>'}
-function renderCharacters(){const a=getCharacters(),h=document.getElementById("homePeople"),l=document.getElementById("characterList");if(!a.length){h.innerHTML='<div class="empty">Todavía no has creado personajes.<br>¡Crea el primero! ✨</div>';l.innerHTML='<div class="empty">No tienes personajes guardados todavía.</div>';return}h.innerHTML=a.slice(0,5).map(c=>card(c,false)).join("");l.innerHTML='<div class="people">'+a.map(c=>card(c,true)).join("")+'</div>'}
-function createCharacter(){
-const name=document.getElementById("name").value.trim(),
-age=Number(document.getElementById("age").value),
-personality=document.getElementById("personality").value.trim(),
-speech=document.getElementById("speech").value,
-interests=document.getElementById("interests").value.trim(),
-description=document.getElementById("description").value.trim(),
-avatar=document.getElementById("avatar").value;
-if(!name){alert("Escribe un nombre.");return}
-if(!age||age<18){alert("La edad debe ser 18 años o más.");return}
-const a=getCharacters();
-a.push({id:Date.now().toString(),name,age,personality,speech,interests,description,avatar});
-saveCharacters(a);clearForm();renderCharacters();show("characters")
+
+function getCharacters(){
+  try { return JSON.parse(localStorage.getItem(KEY)||"[]"); }
+  catch(e){ return []; }
+}
+function saveCharacters(list){
+  localStorage.setItem(KEY,JSON.stringify(list));
+}
+function esc(value){
+  return String(value||"").replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+function show(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  const target=document.getElementById(id);
+  if(target) target.classList.add("active");
+  window.scrollTo(0,0);
 }
 function clearForm(){
-["name","age","personality","interests","description"].forEach(id=>document.getElementById(id).value="");
-document.getElementById("speech").value="Natural y amistosa";
-document.getElementById("avatar").value="🌙"
+  ["name","age","personality","interests","description"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value="";
+  });
+  const speech=document.getElementById("speech");
+  if(speech) speech.value="Natural y amistosa";
+  const avatar=document.getElementById("avatar");
+  if(avatar) avatar.value="🌙";
 }
-function deleteCharacter(id){saveCharacters(getCharacters().filter(c=>c.id!==id));renderCharacters()}
+function createCharacter(){
+  const name=(document.getElementById("name")?.value||"").trim();
+  const age=Number(document.getElementById("age")?.value||0);
+  const personality=(document.getElementById("personality")?.value||"").trim();
+  const speech=document.getElementById("speech")?.value||"Natural y amistosa";
+  const interests=(document.getElementById("interests")?.value||"").trim();
+  const description=(document.getElementById("description")?.value||"").trim();
+  const avatar=document.getElementById("avatar")?.value||"🌙";
+
+  if(!name){ alert("Escribe un nombre para el personaje."); return; }
+  if(age<18){ alert("La edad del personaje debe ser de 18 años o más."); return; }
+
+  const characters=getCharacters();
+  characters.push({
+    id:Date.now().toString(),
+    name,age,personality,speech,interests,description,avatar
+  });
+  saveCharacters(characters);
+  clearForm();
+  renderCharacters();
+  show("characters");
+}
+function deleteCharacter(id){
+  saveCharacters(getCharacters().filter(c=>c.id!==id));
+  renderCharacters();
+}
 function openCharacter(id){
-const c=getCharacters().find(x=>x.id===id);if(!c)return;
-const pc=document.getElementById("profileContent");
-pc.innerHTML='<div class="avatar" style="height:230px;font-size:90px">'+c.avatar+'</div>'+
-'<h1>'+esc(c.name)+'</h1>'+
-'<div class="sub">Edad: '+c.age+' · '+esc(c.personality||"Personalidad por definir")+'</div>'+
-'<div class="person" style="margin-bottom:12px"><strong>🗣️ Forma de hablar</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.speech||"Natural y amistosa")+'</p></div>'+
-'<div class="person" style="margin-bottom:12px"><strong>💜 Gustos e intereses</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.interests||"Aún no definidos")+'</p></div>'+
-'<div class="person" style="margin-bottom:12px"><strong>📝 Descripción</strong><p style="color:#aaa7c2;margin-bottom:0">'+esc(c.description||"Sin descripción.")+'</p></div>'+
-'<button class="primary" onclick="startChat(\''+c.id+'\')">💬 Iniciar chat</button>'+
-'<button class="secondary" onclick="deleteCharacter(\''+c.id+'\');show(\'characters\')">Eliminar personaje</button>';
-show("profileView")
+  const c=getCharacters().find(x=>x.id===id);
+  if(!c) return;
+
+  const pc=document.getElementById("profileContent");
+  if(!pc) return;
+
+  pc.innerHTML=`
+    <div class="avatar" style="height:230px;font-size:90px">${esc(c.avatar)}</div>
+    <h1>${esc(c.name)}</h1>
+    <div class="sub">Edad: ${c.age} · ${esc(c.personality||"Personalidad por definir")}</div>
+    <div class="person" style="margin-bottom:12px">
+      <strong>🗣️ Forma de hablar</strong>
+      <p style="color:#aaa7c2;margin-bottom:0">${esc(c.speech||"Natural y amistosa")}</p>
+    </div>
+    <div class="person" style="margin-bottom:12px">
+      <strong>💜 Gustos e intereses</strong>
+      <p style="color:#aaa7c2;margin-bottom:0">${esc(c.interests||"Aún no definidos")}</p>
+    </div>
+    <div class="person" style="margin-bottom:12px">
+      <strong>📝 Descripción</strong>
+      <p style="color:#aaa7c2;margin-bottom:0">${esc(c.description||"Sin descripción.")}</p>
+    </div>
+    <button class="primary" onclick="startChat('${c.id}')">💬 Iniciar chat</button>
+    <button class="secondary" onclick="deleteCharacter('${c.id}');show('characters')">🗑️ Eliminar personaje</button>
+  `;
+  show("profileView");
 }
 function startChat(id){
-const c=getCharacters().find(x=>x.id===id);if(!c)return;
-document.querySelector("#chat h1").textContent=c.name+" ✓";
-document.querySelector("#chat .sub").textContent=(c.personality||"Personalidad propia")+" · "+(c.speech||"Natural y amistosa");
-show("chat")
+  const c=getCharacters().find(x=>x.id===id);
+  if(!c) return;
+  const title=document.querySelector("#chat h1");
+  const sub=document.querySelector("#chat .sub");
+  if(title) title.textContent=c.name+" ✓";
+  if(sub) sub.textContent=(c.personality||"Personalidad propia")+" · "+(c.speech||"Natural y amistosa");
+  show("chat");
 }
-renderCharacters();
-</script></body></html>
+function renderCharacters(){
+  const list=document.getElementById("charactersList");
+  if(!list) return;
+
+  const characters=getCharacters();
+
+  if(!characters.length){
+    list.innerHTML=`
+      <div class="person" style="text-align:center;padding:28px">
+        <div style="font-size:48px">✨</div>
+        <h3>Aún no tienes personajes</h3>
+        <p style="color:#aaa7c2">Crea tu primer personaje para comenzar.</p>
+        <button class="primary" onclick="show('create')">✨ Crear personaje</button>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML=characters.map(c=>`
+    <div class="person" style="display:flex;align-items:center;gap:14px">
+      <div style="font-size:42px">${esc(c.avatar)}</div>
+      <div style="flex:1">
+        <h3 style="margin:0">${esc(c.name)}</h3>
+        <p style="color:#aaa7c2;margin:4px 0 0">${esc(c.personality||"Personalidad propia")}</p>
+      </div>
+      <button class="secondary" onclick="openCharacter('${c.id}')">Ver</button>
+    </div>
+  `).join("");
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderCharacters();
+
+  // En caso de que el HTML original use enlaces/botones con data-view,
+  // los conectamos automáticamente.
+  document.querySelectorAll("[data-view]").forEach(el=>{
+    el.addEventListener("click",()=>show(el.dataset.view));
+  });
+});
+</script>
+</body></html>
