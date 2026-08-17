@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="es">
 <head>
@@ -59,6 +58,10 @@ input:focus,select:focus,textarea:focus{border-color:#a45cff}
 .char button{border:0;border-radius:13px;background:#292052;color:#fff;padding:10px}
 .toast{position:fixed;left:50%;bottom:94px;transform:translateX(-50%);background:#fff;color:#100d25;border-radius:15px;padding:12px 16px;font-weight:700;z-index:20;box-shadow:0 10px 30px #0006;display:none}
 .small{font-size:13px;color:var(--muted)}
+.form-section{background:#0f0c25;border:1px solid #ffffff12;border-radius:22px;padding:16px}
+.form-section h3{font-size:21px;margin:0 0 14px}
+.hint{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.35}
+.conditional{display:none}
 </style>
 </head>
 <body>
@@ -81,7 +84,7 @@ input:focus,select:focus,textarea:focus{border-color:#a45cff}
 </div>
 
 <script>
-const KEY="ai_social_characters_v5";
+const KEY="ai_social_characters_v6";
 const getChars=()=>JSON.parse(localStorage.getItem(KEY)||"[]");
 const saveChars=(x)=>localStorage.setItem(KEY,JSON.stringify(x));
 const content=document.getElementById("content");
@@ -123,38 +126,58 @@ function renderCreate(){
  content.innerHTML=`
  <button class="back" onclick="go('home')">← Inicio</button>
  <h2>Crear personaje</h2>
- <p class="subtitle">Primera versión del creador.</p>
- <div class="notice">En esta versión guardaremos el personaje directamente en este navegador. Después conectaremos una base de datos y la IA.</div><br>
+ <p class="subtitle">Define su personalidad y su apariencia.</p>
+ <div class="notice">La edad mínima es 18 años. Los datos se guardan localmente en este navegador; más adelante los conectaremos con la IA.</div><br>
  <form class="form" id="form">
-   <label>Nombre<input id="name" required placeholder="Ej. Alex"></label>
-   <label>Edad<input id="age" required type="number" min="18" placeholder="18 o más"></label>
-   <label>Personalidad<input id="personality" required placeholder="Ej. divertido, seguro, curioso"></label>
-   <label>Forma de hablar<select id="speech"><option>Natural y amistosa</option><option>Divertida y juguetona</option><option>Seria y tranquila</option><option>Directa y segura</option></select></label>
-   <label>Gustos e intereses<input id="interests" placeholder="Ej. música, videojuegos, viajes"></label>
-   <label>Descripción<textarea id="description" placeholder="Cuenta brevemente quién es este personaje..."></textarea></label>
+   <div class="form-section">
+     <h3>Información básica</h3>
+     <label>Nombre<input id="name" required placeholder="Ej. Alex"></label><br>
+     <label>Edad<input id="age" required type="number" min="18" placeholder="18 o más"></label><br>
+     <label>Género<select id="gender" required onchange="togglePhysicalFields()"><option value="">Selecciona...</option><option>Hombre</option><option>Mujer</option><option>Trans</option></select></label><br>
+     <label>Nacionalidad<input id="nationality" list="countrySuggestions" required placeholder="Ej. México, Japón, Francia..."><datalist id="countrySuggestions"><option>México</option><option>Estados Unidos</option><option>Canadá</option><option>Brasil</option><option>Argentina</option><option>Colombia</option><option>España</option><option>Francia</option><option>Italia</option><option>Alemania</option><option>Reino Unido</option><option>Rusia</option><option>Turquía</option><option>Egipto</option><option>Marruecos</option><option>Sudáfrica</option><option>India</option><option>China</option><option>Japón</option><option>Corea del Sur</option><option>Australia</option></datalist><div class="hint">Puedes escribir cualquier país; no está limitada a una lista cerrada.</div></label>
+   </div>
+   <div class="form-section">
+     <h3>Apariencia</h3>
+     <label>Color de piel<select id="skin"><option>Muy claro · rosado</option><option>Claro · melocotón</option><option>Claro · rosado</option><option>Medio · beige</option><option>Medio · cálido</option><option>Moreno claro · caramelo</option><option>Moreno · marrón cálido</option><option>Moreno oscuro · cacao</option><option>Muy oscuro · marrón profundo</option></select></label><br>
+     <label>Tipo de cuerpo<select id="bodyType"><option>Delgado</option><option>Promedio</option><option>Atlético</option><option>Curvo</option><option>Musculoso</option><option>Robusto</option></select></label><br>
+     <div id="penisField" class="conditional"><label>Tamaño del pene<select id="penisSize"><option>Pequeño</option><option>Mediano</option><option>Grande</option><option>Gigante</option></select></label><br></div>
+     <div id="breastsField" class="conditional"><label>Tamaño de los senos<select id="breastSize"><option>Planos</option><option>Pequeños</option><option>Medianos</option><option>Grandes</option><option>Gigantes</option></select></label><br></div>
+     <div id="glutesField" class="conditional"><label>Tamaño de los glúteos<select id="gluteSize"><option>Pequeños</option><option>Medianos</option><option>Grandes</option><option>Gigantes</option></select></label><br></div>
+     <label>Tipo de pelo<select id="hairType"><option>Lacio</option><option>Ondulado</option><option>Rizado</option><option>Calvo</option></select></label><br>
+     <label>Largo del pelo<select id="hairLength"><option>Corto</option><option>Mediano</option><option>Largo</option></select></label><br>
+     <label>Extras en el pelo<select id="hairExtra"><option>Ninguno</option><option>Flequillo</option><option>Moño</option><option>Cola de caballo</option></select></label><br>
+     <label>Color del pelo<select id="hairColor"><option>Negro</option><option>Castaño oscuro</option><option>Castaño</option><option>Rubio oscuro</option><option>Rubio</option><option>Pelirrojo</option><option>Gris</option><option>Blanco</option><option>Rosa</option><option>Azul</option><option>Morado</option><option>Verde</option></select></label><br>
+     <label>Color de ojos<select id="eyeColor"><option>Marrón oscuro</option><option>Marrón</option><option>Ámbar</option><option>Avellana</option><option>Verde</option><option>Azul</option><option>Gris</option><option>Negro</option><option>Violeta</option><option>Rojo</option></select></label><br>
+     <label>Estatura<select id="height"><option>Muy bajo/a</option><option>Bajo/a</option><option>Mediano/a</option><option>Alto/a</option><option>Muy alto/a</option></select></label>
+   </div>
+   <div class="form-section">
+     <h3>Personalidad y estilo</h3>
+     <label>Personalidad<input id="personality" required placeholder="Ej. divertido, seguro, curioso"></label><br>
+     <label>Forma de hablar<select id="speech"><option>Natural y amistosa</option><option>Divertida y juguetona</option><option>Seria y tranquila</option><option>Directa y segura</option></select></label><br>
+     <label>Gustos e intereses<input id="interests" placeholder="Ej. música, videojuegos, viajes"></label><br>
+     <label>Descripción<textarea id="description" placeholder="Cuenta brevemente quién es este personaje..."></textarea></label>
+   </div>
    <label>Avatar<select id="avatar"><option>👩</option><option>👨</option><option>🧑</option><option>🦊</option><option>🐱</option><option>🤖</option><option>✨</option></select></label>
    <button class="primary" type="submit">Guardar personaje</button>
    <button class="secondary" type="button" onclick="go('home')">Cancelar</button>
  </form>`;
  document.getElementById("form").onsubmit=saveCharacter;
+ togglePhysicalFields();
 }
-
+function togglePhysicalFields(){
+ const gender=document.getElementById("gender")?.value;
+ const p=document.getElementById("penisField"),b=document.getElementById("breastsField"),g=document.getElementById("glutesField");
+ if(!p)return;
+ p.style.display=(gender==="Hombre"||gender==="Trans")?"block":"none";
+ b.style.display=(gender==="Mujer"||gender==="Trans")?"block":"none";
+ g.style.display=(gender==="Mujer"||gender==="Trans")?"block":"none";
+}
+function val(id){return document.getElementById(id)?.value||""}
 function saveCharacter(e){
- e.preventDefault();
- const age=Number(document.getElementById("age").value);
- if(age<18){showToast("La edad mínima es 18 años.");return;}
- const chars=getChars();
- chars.unshift({
-  id:Date.now(),name:document.getElementById("name").value.trim(),age,
-  personality:document.getElementById("personality").value.trim(),
-  speech:document.getElementById("speech").value,
-  interests:document.getElementById("interests").value.trim(),
-  description:document.getElementById("description").value.trim(),
-  avatar:document.getElementById("avatar").value
- });
- saveChars(chars);
- showToast("Personaje guardado ✓");
- setTimeout(()=>go("characters"),450);
+ e.preventDefault(); const age=Number(val("age")); if(age<18){showToast("La edad mínima es 18 años.");return;}
+ const gender=val("gender"),chars=getChars();
+ chars.unshift({id:Date.now(),name:val("name").trim(),age,gender,nationality:val("nationality").trim(),appearance:{skin:val("skin"),bodyType:val("bodyType"),penisSize:(gender==="Hombre"||gender==="Trans")?val("penisSize"):"",breastSize:(gender==="Mujer"||gender==="Trans")?val("breastSize"):"",gluteSize:(gender==="Mujer"||gender==="Trans")?val("gluteSize"):"",hairType:val("hairType"),hairLength:val("hairLength"),hairExtra:val("hairExtra"),hairColor:val("hairColor"),eyeColor:val("eyeColor"),height:val("height")},personality:val("personality").trim(),speech:val("speech"),interests:val("interests").trim(),description:val("description").trim(),avatar:val("avatar")});
+ saveChars(chars); showToast("Personaje guardado ✓"); setTimeout(()=>go("characters"),450);
 }
 
 function charMini(c){
@@ -168,16 +191,17 @@ function renderCharacters(){
 function openChar(id){
  const c=getChars().find(x=>x.id===id);
  if(!c)return;
+ const a=c.appearance||{};
  content.innerHTML=`<button class="back" onclick="go('characters')">← Mis personajes</button>
- <div class="char" style="margin-bottom:18px"><div class="avatar" style="width:74px;height:74px;font-size:38px">${c.avatar}</div><div class="info"><div class="name" style="font-size:24px">${esc(c.name)}</div><div class="meta">${c.age} años · ${esc(c.speech)}</div></div></div>
- <div class="notice"><b>Personalidad:</b> ${esc(c.personality)}<br><br><b>Intereses:</b> ${esc(c.interests||"No especificados")}<br><br><b>Descripción:</b> ${esc(c.description||"Sin descripción.")}</div>
+ <div class="char" style="margin-bottom:18px"><div class="avatar" style="width:74px;height:74px;font-size:38px">${c.avatar}</div><div class="info"><div class="name" style="font-size:24px">${esc(c.name)}</div><div class="meta">${c.age} años · ${esc(c.gender||"")} · ${esc(c.speech)}</div></div></div>
+ <div class="notice"><b>Nacionalidad:</b> ${esc(c.nationality||"No especificada")}<br><br><b>Apariencia:</b> ${esc(a.skin||"")} · ${esc(a.bodyType||"")} · ${esc(a.height||"")}<br><b>Pelo:</b> ${esc(a.hairType||"")} · ${esc(a.hairLength||"")} · ${esc(a.hairColor||"")} · ${esc(a.hairExtra||"")}<br><b>Ojos:</b> ${esc(a.eyeColor||"")}<br>${a.penisSize?`<b>Tamaño del pene:</b> ${esc(a.penisSize)}<br>`:""}${a.breastSize?`<b>Tamaño de los senos:</b> ${esc(a.breastSize)}<br>`:""}${a.gluteSize?`<b>Tamaño de los glúteos:</b> ${esc(a.gluteSize)}<br>`:""}<br><b>Personalidad:</b> ${esc(c.personality)}<br><br><b>Intereses:</b> ${esc(c.interests||"No especificados")}<br><br><b>Descripción:</b> ${esc(c.description||"Sin descripción.")}</div>
  <br><button class="primary" onclick="showToast('El chat con IA será el siguiente módulo.')">💬 Iniciar chat</button>`;
 }
 function renderChats(){
  content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones aparecerán aquí.</p><div class="empty">Todavía no hay conversaciones.<br><br>Primero crea un personaje y después conectaremos el chat con IA.</div>`;
 }
 function renderProfile(){
- content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v5.<br>Los personajes se guardan en este dispositivo.</div>`;
+ content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v6.<br>Los personajes se guardan en este dispositivo.</div>`;
 }
 function showToast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
