@@ -63,6 +63,29 @@ input:focus,select:focus,textarea:focus{border-color:#a45cff}
 .form-section h3{font-size:21px;margin:0 0 14px}
 .hint{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.35}
 .conditional{display:none}
+
+.chat-head{display:flex;align-items:center;gap:12px;background:#14102f;border:1px solid #ffffff14;border-radius:22px;padding:12px;margin-bottom:14px}
+.chat-head .avatar{width:50px;height:50px;font-size:25px}
+.chat-messages{display:flex;flex-direction:column;gap:8px;min-height:45vh;padding:8px 2px 14px}
+.msg-row{display:flex;width:100%;touch-action:pan-y}
+.msg-row.user{justify-content:flex-end}
+.msg{max-width:82%;position:relative;border-radius:20px;padding:11px 13px;background:#171333;border:1px solid #ffffff12;box-shadow:0 7px 20px #0002;user-select:none;transition:transform .12s}
+.msg-row.user .msg{background:linear-gradient(135deg,#6328d9,#8d2dbe)}
+.msg .reply-ref{border-left:3px solid #ff3aa6;background:#0e0b25aa;border-radius:10px;padding:7px 9px;margin-bottom:8px;font-size:12px;color:#ddd8ee}
+.msg .reply-ref b{display:block;color:#ff8ac9;margin-bottom:2px}
+.msg-text{white-space:pre-wrap;word-break:break-word;font-size:16px;line-height:1.35}
+.msg-time{display:block;color:#bbb5cf;font-size:10px;text-align:right;margin-top:5px}
+.reply-bar{display:none;align-items:center;gap:10px;background:#171333;border:1px solid #ffffff14;border-radius:16px;padding:9px 11px;margin-bottom:8px}
+.reply-bar.show{display:flex}
+.reply-bar .reply-content{min-width:0;flex:1;border-left:3px solid #ff3aa6;padding-left:9px}
+.reply-bar b{display:block;font-size:12px;color:#ff8ac9}
+.reply-bar span{display:block;color:#c9c5dd;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reply-cancel{border:0;background:none;color:#aaa7c4;font-size:22px;padding:4px 7px}
+.chat-compose{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,#08061b 18%);padding:12px 0 4px}
+.chat-compose form{display:flex;gap:8px;align-items:flex-end}
+.chat-compose textarea{margin:0;min-height:50px;max-height:130px;resize:none;border-radius:18px;padding:14px}
+.chat-send{border:0;border-radius:17px;width:52px;height:52px;background:linear-gradient(135deg,#ff239b,#733cff);color:#fff;font-size:21px;font-weight:800}
+.swipe-hint{font-size:12px;color:var(--muted);text-align:center;margin:-2px 0 10px}
 </style>
 </head>
 <body>
@@ -85,7 +108,7 @@ input:focus,select:focus,textarea:focus{border-color:#a45cff}
 </div>
 
 <script>
-const KEY="ai_social_characters_v7";
+const KEY="ai_social_characters_v8";
 const getChars=()=>JSON.parse(localStorage.getItem(KEY)||"[]");
 const saveChars=(x)=>localStorage.setItem(KEY,JSON.stringify(x));
 const content=document.getElementById("content");
@@ -102,6 +125,7 @@ function render(page){
   if(page==="create") return renderCreate();
   if(page==="characters") return renderCharacters();
   if(page==="chats") return renderChats();
+   if(page==="chat") return renderChat();
   if(page==="profile") return renderProfile();
   renderHome();
 }
@@ -266,10 +290,108 @@ function openChar(id){
  content.innerHTML=`<button class="back" onclick="go('characters')">← Mis personajes</button>
  <div class="char" style="margin-bottom:18px"><div class="avatar" style="width:74px;height:74px;font-size:38px">${c.avatar}</div><div class="info"><div class="name" style="font-size:24px">${esc(c.name)}</div><div class="meta">${c.age} años · ${esc(c.gender||"")} · ${esc(c.speech)}</div></div></div>
  <div class="notice"><b>Nacionalidad:</b> ${esc(c.nationality||"No especificada")}<br><br><b>Apariencia:</b> ${esc(a.skin||"")} · ${esc(a.bodyType||"")} · ${esc(a.height||"")}<br><b>Pelo:</b> ${esc(a.hairType||"")} · ${esc(a.hairLength||"")} · ${esc(a.hairColor||"")} · ${esc(a.hairExtra||"")}<br><b>Ojos:</b> ${esc(a.eyeColor||"")}<br>${a.penisSize?`<b>Tamaño del pene:</b> ${esc(a.penisSize)}<br>`:""}${a.breastSize?`<b>Tamaño de los senos:</b> ${esc(a.breastSize)}<br>`:""}${a.gluteSize?`<b>Tamaño de los glúteos:</b> ${esc(a.gluteSize)}<br>`:""}<br><b>Personalidad:</b> ${esc(c.personality)}<br><br><b>Intereses:</b> ${esc(c.interests||"No especificados")}<br><br><b>Descripción:</b> ${esc(c.description||"Sin descripción.")}</div>
- <br><button class="primary" onclick="showToast('El chat con IA será el siguiente módulo.')">💬 Iniciar chat</button>`;
+ <br><button class="primary" onclick="openChat(${c.id})">💬 Iniciar chat</button>`;
+}
+
+const CHAT_KEY="ai_social_chats_v1";
+let activeChatCharacterId=null;
+let activeReply=null;
+
+function getChats(){
+  try{return JSON.parse(localStorage.getItem(CHAT_KEY)||"{}");}catch(_){return {};}
+}
+function saveChats(x){localStorage.setItem(CHAT_KEY,JSON.stringify(x));}
+function getChatMessages(id){
+  const x=getChats(); return Array.isArray(x[String(id)])?x[String(id)]:[];
+}
+function saveChatMessages(id,messages){
+  const x=getChats(); x[String(id)]=messages; saveChats(x);
+}
+function chatPreview(text,max=120){
+  const s=String(text||"").replace(/\s+/g," ").trim();
+  return s.length>max?s.slice(0,max-1)+"…":s;
+}
+function chatTime(ts){
+  try{return new Intl.DateTimeFormat("es-MX",{hour:"2-digit",minute:"2-digit"}).format(new Date(ts));}catch(_){return "";}
+}
+function getActiveCharacter(){return getChars().find(c=>c.id===activeChatCharacterId)||null;}
+
+function openChat(id){
+  if(!getChars().some(c=>c.id===id))return;
+  activeChatCharacterId=id; activeReply=null; go("chat");
+}
+function selectReply(id){
+  const m=getChatMessages(activeChatCharacterId).find(x=>x.id===id);
+  if(!m)return;
+  activeReply={id:m.id,text:m.text,sender:m.sender};
+  renderReplyBar();
+  document.getElementById("chatInput")?.focus();
+}
+function cancelReply(){activeReply=null;renderReplyBar();}
+function renderReplyBar(){
+  const bar=document.getElementById("replyBar"); if(!bar)return;
+  if(!activeReply){bar.className="reply-bar";bar.innerHTML="";return;}
+  const c=getActiveCharacter();
+  bar.className="reply-bar show";
+  bar.innerHTML=`<div class="reply-content"><b>Respondiendo a ${activeReply.sender==="user"?"tu mensaje":"el mensaje de "+esc(c?.name||"personaje")}</b><span>${esc(chatPreview(activeReply.text))}</span></div><button class="reply-cancel" type="button" onclick="cancelReply()">×</button>`;
+}
+function renderChatMessage(m){
+  const c=getActiveCharacter(), reply=m.replyTo;
+  const ref=reply?`<div class="reply-ref"><b>${reply.sender==="user"?"Tú":esc(c?.name||"Personaje")}</b>${esc(chatPreview(reply.text,180))}</div>`:"";
+  return `<div class="msg-row ${m.sender==="user"?"user":""}"><div class="msg" data-swipe-id="${esc(String(m.id))}">${ref}<div class="msg-text">${esc(m.text)}</div><span class="msg-time">${chatTime(m.createdAt)}</span></div></div>`;
+}
+function bindSwipeToReply(){
+  document.querySelectorAll("[data-swipe-id]").forEach(el=>{
+    let sx=0,sy=0;
+    el.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+    el.addEventListener("touchmove",e=>{
+      const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+      if(dx>0&&Math.abs(dx)>Math.abs(dy)&&dx<90)el.style.transform=`translateX(${dx}px)`;
+    },{passive:true});
+    el.addEventListener("touchend",e=>{
+      const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+      el.style.transform="";
+      if(dx>55&&Math.abs(dx)>Math.abs(dy))selectReply(el.dataset.swipeId);
+    });
+    el.addEventListener("click",()=>selectReply(el.dataset.swipeId));
+  });
+}
+function sendChatMessage(e){
+  e.preventDefault();
+  const input=document.getElementById("chatInput"),text=input?.value.trim();
+  if(!text)return;
+  const messages=getChatMessages(activeChatCharacterId);
+  messages.push({
+    id:"m_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+    sender:"user",text,createdAt:Date.now(),
+    replyTo:activeReply?{id:activeReply.id,sender:activeReply.sender,text:activeReply.text}:null
+  });
+  saveChatMessages(activeChatCharacterId,messages);
+  activeReply=null; renderChat();
+  showToast("Mensaje enviado ✓");
+}
+function renderChat(){
+  const c=getActiveCharacter(); if(!c){go("characters");return;}
+  const messages=getChatMessages(c.id);
+  content.innerHTML=`<button class="back" onclick="go('characters')">← Mis personajes</button>
+  <div class="chat-head"><div class="avatar">${c.avatar}</div><div class="info"><div class="name">${esc(c.name)}</div><div class="meta">${esc(c.personality||"Personaje de AI Social")}</div></div></div>
+  <div class="swipe-hint">Desliza un mensaje hacia la derecha para responder</div>
+  <div id="chatMessages" class="chat-messages">${messages.length?messages.map(renderChatMessage).join(""):`<div class="empty">Comienza la conversación con ${esc(c.name)}.</div>`}</div>
+  <div class="chat-compose"><div id="replyBar" class="reply-bar"></div><form id="chatForm"><textarea id="chatInput" rows="1" maxlength="4000" placeholder="Escribe un mensaje..." autocomplete="off"></textarea><button class="chat-send" type="submit">➤</button></form></div>`;
+  renderReplyBar(); bindSwipeToReply();
+  document.getElementById("chatForm").onsubmit=sendChatMessage;
+  const input=document.getElementById("chatInput");
+  input.addEventListener("input",()=>{input.style.height="auto";input.style.height=Math.min(input.scrollHeight,130)+"px";});
+  setTimeout(()=>{input.focus();const box=document.getElementById("chatMessages");if(box)box.scrollTop=box.scrollHeight;},0);
 }
 function renderChats(){
- content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones aparecerán aquí.</p><div class="empty">Todavía no hay conversaciones.<br><br>Primero crea un personaje y después conectaremos el chat con IA.</div>`;
+  const chars=getChars(),chats=getChats();
+  const items=Object.keys(chats).map(id=>{
+    const c=chars.find(x=>String(x.id)===String(id)),ms=Array.isArray(chats[id])?chats[id]:[],last=ms[ms.length-1];
+    return c&&last?{c,last}:null;
+  }).filter(Boolean).sort((a,b)=>b.last.createdAt-a.last.createdAt);
+  content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones guardadas en este dispositivo.</p>
+  ${items.length?items.map(x=>`<button class="char" style="width:100%;text-align:left;border:1px solid #ffffff14" onclick="openChat(${x.c.id})"><div class="avatar">${x.c.avatar}</div><div class="info"><div class="name">${esc(x.c.name)}</div><div class="meta">${esc(chatPreview(x.last.text))}</div></div><span class="small">${chatTime(x.last.createdAt)}</span></button>`).join(""):`<div class="empty">Todavía no hay conversaciones.<br><br>${chars.length?"Abre un personaje y pulsa «Iniciar chat».":"Primero crea un personaje."}</div>`}`;
 }
 function renderProfile(){
  content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v7.<br>Los personajes se guardan en este dispositivo.</div>`;
