@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -84,7 +85,7 @@ input:focus,select:focus,textarea:focus{border-color:#a45cff}
 </div>
 
 <script>
-const KEY="ai_social_characters_v6";
+const KEY="ai_social_characters_v7";
 const getChars=()=>JSON.parse(localStorage.getItem(KEY)||"[]");
 const saveChars=(x)=>localStorage.setItem(KEY,JSON.stringify(x));
 const content=document.getElementById("content");
@@ -120,6 +121,29 @@ function renderHome(){
       <div class="sectionhead"><h2>Tus personajes</h2><a onclick="go('characters')">Ver todos ›</a></div>
       ${chars.length ? chars.slice(0,3).map(charMini).join("") : `<div class="empty">Todavía no tienes personajes.<br><br><button class="primary" onclick="go('create')">Crear mi primer personaje</button></div>`}
     </section>`;
+}
+
+
+const OPTION_CATALOG={
+  skin:["Muy claro · rosado","Claro · melocotón","Claro · rosado","Medio · beige","Medio · cálido","Moreno claro · caramelo","Moreno · marrón cálido","Moreno oscuro · cacao","Muy oscuro · marrón profundo"],
+  bodyType:["Delgado","Promedio","Atlético","Curvo","Musculoso","Robusto"],
+  penisSize:["Pequeño","Mediano","Grande","Gigante"],
+  breastSize:["Planos","Pequeños","Medianos","Grandes","Gigantes"],
+  gluteSize:["Pequeños","Medianos","Grandes","Gigantes"],
+  hairType:["Lacio","Ondulado","Rizado","Calvo"],
+  hairLength:["Corto","Mediano","Largo"],
+  hairExtra:["Ninguno","Flequillo","Moño","Cola de caballo"],
+  hairColor:["Negro","Castaño oscuro","Castaño","Rubio oscuro","Rubio","Pelirrojo","Gris","Blanco","Rosa","Azul","Morado","Verde"],
+  eyeColor:["Marrón oscuro","Marrón","Ámbar","Avellana","Verde","Azul","Gris","Negro","Violeta","Rojo"],
+  height:["Muy bajo/a","Bajo/a","Mediano/a","Alto/a","Muy alto/a"]
+};
+
+const IMAGE_SLOTS=Object.fromEntries(
+  Object.keys(OPTION_CATALOG).map(k=>[k,Object.fromEntries(OPTION_CATALOG[k].map(v=>[v,null]))])
+);
+
+function getImageSlot(field,value){
+  return IMAGE_SLOTS[field]?.[value]||null;
 }
 
 function renderCreate(){
@@ -174,10 +198,57 @@ function togglePhysicalFields(){
 }
 function val(id){return document.getElementById(id)?.value||""}
 function saveCharacter(e){
- e.preventDefault(); const age=Number(val("age")); if(age<18){showToast("La edad mínima es 18 años.");return;}
- const gender=val("gender"),chars=getChars();
- chars.unshift({id:Date.now(),name:val("name").trim(),age,gender,nationality:val("nationality").trim(),appearance:{skin:val("skin"),bodyType:val("bodyType"),penisSize:(gender==="Hombre"||gender==="Trans")?val("penisSize"):"",breastSize:(gender==="Mujer"||gender==="Trans")?val("breastSize"):"",gluteSize:(gender==="Mujer"||gender==="Trans")?val("gluteSize"):"",hairType:val("hairType"),hairLength:val("hairLength"),hairExtra:val("hairExtra"),hairColor:val("hairColor"),eyeColor:val("eyeColor"),height:val("height")},personality:val("personality").trim(),speech:val("speech"),interests:val("interests").trim(),description:val("description").trim(),avatar:val("avatar")});
- saveChars(chars); showToast("Personaje guardado ✓"); setTimeout(()=>go("characters"),450);
+  e.preventDefault();
+  const age=Number(val("age"));
+  if(age<18){showToast("La edad mínima es 18 años.");return;}
+
+  const gender=val("gender"),chars=getChars();
+  const appearance={
+    skin:val("skin"),
+    bodyType:val("bodyType"),
+    penisSize:(gender==="Hombre"||gender==="Trans")?val("penisSize"):"",
+    breastSize:(gender==="Mujer"||gender==="Trans")?val("breastSize"):"",
+    gluteSize:(gender==="Mujer"||gender==="Trans")?val("gluteSize"):"",
+    hairType:val("hairType"),
+    hairLength:val("hairLength"),
+    hairExtra:val("hairExtra"),
+    hairColor:val("hairColor"),
+    eyeColor:val("eyeColor"),
+    height:val("height")
+  };
+
+  const imageRefs={
+    skin:getImageSlot("skin",appearance.skin),
+    bodyType:getImageSlot("bodyType",appearance.bodyType),
+    penisSize:getImageSlot("penisSize",appearance.penisSize),
+    breastSize:getImageSlot("breastSize",appearance.breastSize),
+    gluteSize:getImageSlot("gluteSize",appearance.gluteSize),
+    hairType:getImageSlot("hairType",appearance.hairType),
+    hairLength:getImageSlot("hairLength",appearance.hairLength),
+    hairExtra:getImageSlot("hairExtra",appearance.hairExtra),
+    hairColor:getImageSlot("hairColor",appearance.hairColor),
+    eyeColor:getImageSlot("eyeColor",appearance.eyeColor),
+    height:getImageSlot("height",appearance.height)
+  };
+
+  chars.unshift({
+    id:Date.now(),
+    name:val("name").trim(),
+    age,
+    gender,
+    nationality:val("nationality").trim(),
+    appearance,
+    imageRefs,
+    personality:val("personality").trim(),
+    speech:val("speech"),
+    interests:val("interests").trim(),
+    description:val("description").trim(),
+    avatar:val("avatar")
+  });
+
+  saveChars(chars);
+  showToast("Personaje guardado ✓");
+  setTimeout(()=>go("characters"),450);
 }
 
 function charMini(c){
@@ -201,11 +272,31 @@ function renderChats(){
  content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones aparecerán aquí.</p><div class="empty">Todavía no hay conversaciones.<br><br>Primero crea un personaje y después conectaremos el chat con IA.</div>`;
 }
 function renderProfile(){
- content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v6.<br>Los personajes se guardan en este dispositivo.</div>`;
+ content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v7.<br>Los personajes se guardan en este dispositivo.</div>`;
 }
 function showToast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
+
+function migrateLegacyCharacters(){
+  const legacyKey="ai_social_characters_v6";
+  const current=localStorage.getItem(KEY);
+  const legacy=localStorage.getItem(legacyKey);
+  if(!current && legacy){
+    try{
+      const chars=JSON.parse(legacy)||[];
+      chars.forEach(c=>{
+        c.imageRefs=c.imageRefs||{};
+        Object.keys(IMAGE_SLOTS).forEach(k=>{
+          if(!(k in c.imageRefs)) c.imageRefs[k]=null;
+        });
+      });
+      saveChars(chars);
+    }catch(_){}
+  }
+}
+
+migrateLegacyCharacters();
 render(location.hash.slice(1)||"home");
 </script>
 </body>
