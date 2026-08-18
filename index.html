@@ -205,6 +205,15 @@ function renderCreate(){
      <label>Gustos e intereses<input id="interests" placeholder="Ej. música, videojuegos, viajes"></label><br>
      <label>Descripción<textarea id="description" placeholder="Cuenta brevemente quién es este personaje..."></textarea></label>
    </div>
+   <div class="form-section">
+     <h3>Contexto inicial</h3>
+     <p class="hint">Describe libremente la situación en la que comienza vuestra historia. Estos datos ayudarán a la IA a interpretar la relación y la escena inicial.</p>
+     <label>¿Qué relación tienes con el personaje?<textarea id="relationship" placeholder="Ej. Somos compañeros de trabajo, pero apenas nos conocemos."></textarea></label><br>
+     <label>¿Dónde se conocen o dónde comienza la historia?<textarea id="meetingPlace" placeholder="Ej. En una cafetería después del trabajo."></textarea></label><br>
+     <label>¿Cuándo ocurre el encuentro?<textarea id="meetingTime" placeholder="Ej. Una noche de viernes, alrededor de las 9."></textarea></label><br>
+     <label>¿A qué se dedica el personaje?<textarea id="profession" placeholder="Ej. Es fotógrafa profesional y trabaja para una revista."></textarea></label><br>
+     <label>¿Qué está ocurriendo al comenzar la conversación?<textarea id="initialSituation" placeholder="Ej. Estamos sentados en una cafetería y acaba de terminar su turno."></textarea></label>
+   </div>
    <label>Avatar<select id="avatar"><option>👩</option><option>👨</option><option>🧑</option><option>🦊</option><option>🐱</option><option>🤖</option><option>✨</option></select></label>
    <button class="primary" type="submit">Guardar personaje</button>
    <button class="secondary" type="button" onclick="go('home')">Cancelar</button>
@@ -267,6 +276,11 @@ function saveCharacter(e){
     speech:val("speech"),
     interests:val("interests").trim(),
     description:val("description").trim(),
+    relationship:val("relationship").trim(),
+    meetingPlace:val("meetingPlace").trim(),
+    meetingTime:val("meetingTime").trim(),
+    profession:val("profession").trim(),
+    initialSituation:val("initialSituation").trim(),
     avatar:val("avatar")
   });
 
@@ -419,7 +433,14 @@ async function requestAIReply(character,messages){
       personality:character.personality||"",
       speech:character.speech||"",
       interests:character.interests||"",
-      description:character.description||""
+      description:character.description||"",
+      context:{
+        relationship:character.relationship||"",
+        meetingPlace:character.meetingPlace||"",
+        meetingTime:character.meetingTime||"",
+        profession:character.profession||"",
+        initialSituation:character.initialSituation||""
+      }
     },
     messages:messages.map(m=>({
       id:m.id,
