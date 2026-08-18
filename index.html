@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08061b">
-<title>AI Social</title>
+<title>AI Social · V9 IA</title>
 <style>
 :root{
   --bg:#08061b;--panel:#12102b;--panel2:#18143a;--text:#fff;--muted:#aaa7c4;
@@ -356,27 +356,98 @@ function bindSwipeToReply(){
     el.addEventListener("click",()=>selectReply(el.dataset.swipeId));
   });
 }
-function sendChatMessage(e){
+async function sendChatMessage(e){
   e.preventDefault();
   const input=document.getElementById("chatInput"),text=input?.value.trim();
-  if(!text)return;
+  if(!text || !activeChatCharacterId)return;
+
+  const c=getActiveCharacter();
   const messages=getChatMessages(activeChatCharacterId);
-  messages.push({
+  const userMessage={
     id:"m_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
     sender:"user",text,createdAt:Date.now(),
     replyTo:activeReply?{id:activeReply.id,sender:activeReply.sender,text:activeReply.text}:null
-  });
+  };
+
+  messages.push(userMessage);
   saveChatMessages(activeChatCharacterId,messages);
-  activeReply=null; renderChat();
-  showToast("Mensaje enviado ✓");
+  activeReply=null;
+  input.value="";
+  renderChat();
+
+  const status=document.getElementById("aiStatus");
+  if(status){status.textContent="✦ "+c.name+" está escribiendo…";status.style.display="block";}
+
+  try{
+    const reply=await requestAIReply(c,messages);
+    const aiMessage={
+      id:"m_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+      sender:"ai",text:reply,createdAt:Date.now(),
+      replyTo:{id:userMessage.id,sender:"user",text:userMessage.text}
+    };
+    const latest=getChatMessages(activeChatCharacterId);
+    latest.push(aiMessage);
+    saveChatMessages(activeChatCharacterId,latest);
+    renderChat();
+  }catch(err){
+    console.error(err);
+    const latest=getChatMessages(activeChatCharacterId);
+    latest.push({
+      id:"m_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+      sender:"ai",
+      text:"No pude responder en este momento. Comprueba que el servidor de IA esté configurado.",
+      createdAt:Date.now(),
+      replyTo:{id:userMessage.id,sender:"user",text:userMessage.text},
+      error:true
+    });
+    saveChatMessages(activeChatCharacterId,latest);
+    renderChat();
+  }
 }
+
+async function requestAIReply(character,messages){
+  const endpoint=localStorage.getItem("ai_social_api_endpoint")||"";
+  if(!endpoint) throw new Error("AI endpoint not configured");
+
+  const payload={
+    character:{
+      name:character.name,
+      age:character.age,
+      gender:character.gender,
+      nationality:character.nationality,
+      appearance:character.appearance||{},
+      personality:character.personality||"",
+      speech:character.speech||"",
+      interests:character.interests||"",
+      description:character.description||""
+    },
+    messages:messages.map(m=>({
+      id:m.id,
+      role:m.sender==="user"?"user":"assistant",
+      content:m.text,
+      replyTo:m.replyTo||null
+    }))
+  };
+
+  const res=await fetch(endpoint,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+
+  if(!res.ok) throw new Error("AI server HTTP "+res.status);
+  const data=await res.json();
+  if(!data.reply) throw new Error("AI server returned no reply");
+  return String(data.reply);
+}
+
 function renderChat(){
   const c=getActiveCharacter(); if(!c){go("characters");return;}
   const messages=getChatMessages(c.id);
   content.innerHTML=`<button class="back" onclick="go('characters')">← Mis personajes</button>
   <div class="chat-head"><div class="avatar">${c.avatar}</div><div class="info"><div class="name">${esc(c.name)}</div><div class="meta">${esc(c.personality||"Personaje de AI Social")}</div></div></div>
   <div class="swipe-hint">Desliza un mensaje hacia la derecha para responder</div>
-  <div id="chatMessages" class="chat-messages">${messages.length?messages.map(renderChatMessage).join(""):`<div class="empty">Comienza la conversación con ${esc(c.name)}.</div>`}</div>
+  <div id="aiStatus" class="small" style="display:none;text-align:center;margin:0 0 8px"></div><div id="chatMessages" class="chat-messages">${messages.length?messages.map(renderChatMessage).join(""):`<div class="empty">Comienza la conversación con ${esc(c.name)}.</div>`}</div>
   <div class="chat-compose"><div id="replyBar" class="reply-bar"></div><form id="chatForm"><textarea id="chatInput" rows="1" maxlength="4000" placeholder="Escribe un mensaje..." autocomplete="off"></textarea><button class="chat-send" type="submit">➤</button></form></div>`;
   renderReplyBar(); bindSwipeToReply();
   document.getElementById("chatForm").onsubmit=sendChatMessage;
@@ -393,8 +464,16 @@ function renderChats(){
   content.innerHTML=`<h2>Mis chats</h2><p class="subtitle">Tus conversaciones guardadas en este dispositivo.</p>
   ${items.length?items.map(x=>`<button class="char" style="width:100%;text-align:left;border:1px solid #ffffff14" onclick="openChat(${x.c.id})"><div class="avatar">${x.c.avatar}</div><div class="info"><div class="name">${esc(x.c.name)}</div><div class="meta">${esc(chatPreview(x.last.text))}</div></div><span class="small">${chatTime(x.last.createdAt)}</span></button>`).join(""):`<div class="empty">Todavía no hay conversaciones.<br><br>${chars.length?"Abre un personaje y pulsa «Iniciar chat».":"Primero crea un personaje."}</div>`}`;
 }
+function configureAIEndpoint(){
+  const current=localStorage.getItem("ai_social_api_endpoint")||"";
+  const endpoint=prompt("URL del servidor de IA:",current);
+  if(endpoint===null)return;
+  localStorage.setItem("ai_social_api_endpoint",endpoint.trim());
+  showToast(endpoint.trim()?"Servidor de IA guardado ✓":"Servidor de IA borrado");
+}
+
 function renderProfile(){
- content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Prototipo local v7.<br>Los personajes se guardan en este dispositivo.</div>`;
+ content.innerHTML=`<h2>Perfil</h2><p class="subtitle">Configuración básica de tu cuenta.</p><div class="notice"><b>AI Social</b><br><br>Chat con IA conectado mediante un servidor seguro.<br>Los personajes y chats actuales siguen guardándose localmente en este dispositivo.</div><br><button class="primary" onclick="configureAIEndpoint()">⚙️ Configurar servidor de IA</button>`;
 }
 function showToast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
